@@ -35,6 +35,10 @@ class SemifunApp:
         if strict: raise KeyError(f'#::{ftype}:{fname}')
         return None
 
+    @cached_property
+    def ftypes(self):
+        return tuple(self._lookup_tables.keys())
+
     def fn_items(self, *, ftype):
         return [
             (fname, fn_loader.fn)
