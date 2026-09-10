@@ -177,8 +177,8 @@ def test_sync_generator_cleanup():
         cleanup_called.append('teardown')
     app = _app('test', {'resource': resource})
     with app.open_sync_scope(parent_scope=None, seed_data={}, ftype='test') as scope:
-        fn, scope2 = scope.resolve_fn_scope(ftype_suffix='', fname='resource')
-        result = scope2.fn_call(fn=fn, args=(), kwargs={})
+        fn = app.lookup_fn(ftype='test', fname='resource', strict=True)
+        result = scope.fn_call(fn=fn, args=(), kwargs={})
         assert result == 'the_resource'
         assert cleanup_called == ['setup']
     assert cleanup_called == ['setup', 'teardown']

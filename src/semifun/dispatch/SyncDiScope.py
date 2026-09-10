@@ -42,7 +42,7 @@ class SyncDiScope:
         self._resolving.add(T)
         try:
             def compute_type():
-                fn, scope2 = self.resolve_fn_scope(ftype_suffix='_inject', fname=T.__name__)
+                fn, scope2 = self.resolve_injector_and_scope(fname=T.__name__)
                 if scope2 is self:
                     args, kwargs = getattr(T, 'dependency_injection_args2', ((), {}))
                     return self.fn_call(fn=fn, args=args, kwargs=kwargs)
@@ -54,12 +54,12 @@ class SyncDiScope:
         finally:
             self._resolving.discard(T)
 
-    def resolve_fn_scope(self, *, ftype_suffix, fname):
-        ftype = self.ftype + ftype_suffix
+    def resolve_injector_and_scope(self, *, fname):
+        ftype = self.ftype + '_inject'
         if fn := self.app.lookup_fn(ftype=ftype, fname=fname, strict=False):
             return (fn, self)
         elif self.parent_scope:
-            return self.parent_scope.resolve_fn_scope(ftype_suffix=ftype_suffix, fname=fname)
+            return self.parent_scope.resolve_injector_and_scope(fname=fname)
         else:
             raise KeyError(f'#::{ftype}:{fname}')
 
@@ -78,8 +78,8 @@ class SyncDiScope:
         return result
 
     def fname_call(self, *, fname, args, kwargs):
-        fn, scope2 = self.resolve_fn_scope(ftype_suffix='', fname=fname)
-        return scope2.fn_call(fn=fn, args=args, kwargs=kwargs)
+        fn = self.app.lookup_fn(ftype=self.ftype, fname=fname, strict=True)
+        return self.fn_call(fn=fn, args=args, kwargs=kwargs)
 
     def close(self):
         """Drain the cleanup stack in reverse order."""

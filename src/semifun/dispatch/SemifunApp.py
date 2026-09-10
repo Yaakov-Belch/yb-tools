@@ -43,8 +43,8 @@ class SemifunApp:
 
     async def async_dispatch(self, *, parent_scope, seed_data, ftype, fname, args, kwargs):
         async with self.open_async_scope(parent_scope=parent_scope, seed_data=seed_data, ftype=ftype) as scope:
-            fn, scope2 = scope.resolve_fn_scope(ftype_suffix='', fname=fname)
-            return await scope2.fn_call(fn=fn, args=args, kwargs=kwargs)
+            fn = self.lookup_fn(ftype=ftype, fname=fname, strict=True)
+            return await scope.fn_call(fn=fn, args=args, kwargs=kwargs)
 
     async def async_dispatch_all(self, *, parent_scope, seed_data, ftype, args, kwargs):
         async with self.open_async_scope(parent_scope=parent_scope, seed_data=seed_data, ftype=ftype) as scope:
@@ -64,8 +64,8 @@ class SemifunApp:
 
     def sync_dispatch(self, *, parent_scope, seed_data, ftype, fname, args, kwargs):
         with self.open_sync_scope(parent_scope=parent_scope, seed_data=seed_data, ftype=ftype) as scope:
-            fn, scope2 = scope.resolve_fn_scope(ftype_suffix='', fname=fname)
-            return scope2.fn_call(fn=fn, args=args, kwargs=kwargs)
+            fn = self.lookup_fn(ftype=ftype, fname=fname, strict=True)
+            return scope.fn_call(fn=fn, args=args, kwargs=kwargs)
 
     def sync_dispatch_all(self, *, parent_scope, seed_data, ftype, args, kwargs):
         with self.open_sync_scope(parent_scope=parent_scope, seed_data=seed_data, ftype=ftype) as scope:
