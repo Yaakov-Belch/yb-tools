@@ -1,6 +1,6 @@
 {
   "name": "tmsgpack",
-  "version": "0.3.37",
+  "version": "0.3.38",
   "description": "Typed MessagePack serializer (inspired by but different from msgpack)",
   "author": "Yaakov Belch <yaakov.belch@gmail.com>",
   "homepage": "https://github.com/Yaakov-Belch/semifun",
