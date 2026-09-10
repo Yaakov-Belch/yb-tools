@@ -37,31 +37,22 @@ class SyncDiScope:
     def _cache(self): return {**self.seed_data, SyncDiScope: self}
 
     def resolve_type(self, T):
+        (ftype, fname) = (self.ftype + '_inject', T.__name__)
         if T in self._resolving:
-            raise RecursionError(f"Circular dependency: #::{self.ftype}_inject:{T.__name__} is already being resolved")
+            raise RecursionError(f"Circular dependency: #::{ftype}:{fname} is already being resolved")
         self._resolving.add(T)
         try:
             def compute_type():
-                fn, scope2 = self.resolve_injector_and_scope(fname=T.__name__)
-                if scope2 is self:
+                if fn := self.app.lookup_fn(ftype=ftype, fname=fname, strict=False):
                     args, kwargs = getattr(T, 'dependency_injection_args2', ((), {}))
                     return self.fn_call(fn=fn, args=args, kwargs=kwargs)
+                elif self.parent_scope:
+                    return self.parent_scope.resolve_type(T)
                 else:
-                    # The type is defined through the parent_scope chain, not here.
-                    # Cache it where it is defined.
-                    return scope2.resolve_type(T)
+                    raise KeyError(f'#::{ftype}:{fname}')
             return dictdefault(self._cache, T, compute_type)
         finally:
             self._resolving.discard(T)
-
-    def resolve_injector_and_scope(self, *, fname):
-        ftype = self.ftype + '_inject'
-        if fn := self.app.lookup_fn(ftype=ftype, fname=fname, strict=False):
-            return (fn, self)
-        elif self.parent_scope:
-            return self.parent_scope.resolve_injector_and_scope(fname=fname)
-        else:
-            raise KeyError(f'#::{ftype}:{fname}')
 
     def fn_call(self, *, fn, args, kwargs):
         """Call fn with passthrough args/kwargs, resolving Inject[T] params via DI."""
