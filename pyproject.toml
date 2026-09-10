@@ -1,6 +1,6 @@
 [project]
 name = "semifun"
-version = "0.3.36"
+version = "0.3.37"
 description = "Caching, plugins, dependency injection, and CLI dispatch utilities"
 requires-python = ">=3.14"
 license = {text = "ISC"}
